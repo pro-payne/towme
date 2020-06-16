@@ -1,13 +1,35 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Home.css";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 import slide1 from "../../assets/img/slide/slide-1.1.jpg";
 import slide2 from "../../assets/img/slide/slide-2.1.jpg";
 import { Helmet } from "react-helmet";
+import { Link, useHistory } from "react-router-dom";
+import { loggedIn } from "../../dataservice/checkStatus";
 
 const Home = () => {
   const jQuery = useRef(null);
+  const [signIn, setSignIn] = useState(false);
+  const [userType, setUserType] = useState("");
+
+  const history = useHistory();
+  useEffect(() => {
+    const local = localStorage.getItem("user") || "";
+    let user = "";
+    if (local !== "") {
+      const parse = JSON.parse(local);
+      if (
+        typeof parse.user !== "undefined" &&
+        typeof parse.user.type !== "undefined"
+      ) {
+        user = parse.user.type;
+      }
+      localStorage.clear();
+    }
+    setUserType(user);
+    setSignIn(loggedIn());
+  }, [history]);
 
   const handleMount = () => {
     const $ = jQuery.current;
@@ -105,7 +127,7 @@ const Home = () => {
         <title>We are always there for you</title>
       </Helmet>
       <Header addBg />
-      <section id="hero">
+      <section id="hero" className="hero">
         <div className="hero-container">
           <div
             id="heroCarousel"
@@ -136,12 +158,21 @@ const Home = () => {
                       be vetted so that motorists can have a peace of mind
                     </p>
                     <div>
-                      <a
-                        href="Client/Client-sForm.html"
-                        className="btn-menu animated fadeInUp scrollto"
-                      >
-                        Sign up
-                      </a>
+                      {signIn ? (
+                        <Link
+                          to={`/`.concat(userType).concat("/dashboard")}
+                          className="btn-menu animated fadeInUp scrollto"
+                        >
+                          My Account
+                        </Link>
+                      ) : (
+                        <Link
+                          to="signup"
+                          className="btn-menu animated fadeInUp scrollto"
+                        >
+                          Sign up
+                        </Link>
+                      )}
                       <a
                         href="#client"
                         className="btn-book animated fadeInUp scrollto"

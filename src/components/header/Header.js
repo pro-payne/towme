@@ -1,11 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
 import "./Header.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useHistory } from "react-router-dom";
+import { loggedIn } from "../../dataservice/checkStatus";
+import { Post } from "../../dataservice/service";
 
 const Header = (props) => {
   const { addBg, style } = props;
   const location = useLocation();
+  const history = useHistory();
   const [focus, setFocus] = useState("");
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     switch (location.pathname.toLowerCase()) {
@@ -17,6 +21,10 @@ const Header = (props) => {
         break;
     }
   }, [location]);
+
+  useEffect(() => {
+    setSignedIn(loggedIn());
+  }, [history]);
 
   const mobileNav = (inputJ) => {
     const $ = inputJ;
@@ -132,6 +140,34 @@ const Header = (props) => {
     smoothScroll(mrJ);
   }, [smoothScroll]);
 
+  const logOut = (event) => {
+    event.preventDefault();
+    const local = localStorage.getItem("user") || "";
+    let user = "";
+    console.log(local);
+    if (local !== "") {
+      const parse = JSON.parse(local);
+      if (
+        typeof parse.user !== "undefined" &&
+        typeof parse.user.type !== "undefined"
+      ) {
+        user = parse.user.type;
+      }
+    }
+
+    localStorage.clear();
+    history.replace("/signin/".concat(user));
+
+    Post("/auth/logout")
+      .then((response) => {
+        localStorage.clear();
+        history.replace("/signin/".concat(user));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return (
     <header
       id="header"
@@ -168,7 +204,13 @@ const Header = (props) => {
             </li>
 
             <li className="book-a-table text-center">
-              <Link to="/signup">Sign up</Link>
+              {!signedIn ? (
+                <Link to="/signup">Sign up</Link>
+              ) : (
+                <a href="/logout" role="button" onClick={logOut}>
+                  Log out
+                </a>
+              )}
             </li>
           </ul>
         </nav>

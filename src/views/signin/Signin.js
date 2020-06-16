@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 import "../home/Home.css";
-import "./Signup.css";
+import "../signup/Signup.css";
 import Header from "../../components/header/Header";
 import { useLocation, Link, useHistory } from "react-router-dom";
 import Footer from "../../components/footer/Footer";
@@ -9,25 +9,13 @@ import { Helmet } from "react-helmet";
 import { Post } from "../../dataservice/service";
 import { loggedIn } from "../../dataservice/checkStatus";
 
-const Signup = () => {
+const Signin = () => {
   const location = useLocation();
   const history = useHistory();
   const { addToast } = useToasts();
   const [section, setSection] = useState("");
 
   const [form, setForm] = useState({
-    first_name: {
-      value: "",
-      valid: false,
-      touched: false,
-      msg: "",
-    },
-    last_name: {
-      value: "",
-      valid: false,
-      touched: false,
-      msg: "",
-    },
     email: {
       value: "",
       valid: false,
@@ -43,22 +31,21 @@ const Signup = () => {
   });
 
   const [valid, setValid] = useState(false);
-  const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     switch (location.pathname.toLowerCase()) {
-      case "/signup/client":
+      case "/signin/client":
         setSection("client");
         break;
-      case "/signup/company":
+      case "/signin/company":
         setSection("company");
         break;
-      case "/signup":
+      case "/signin":
         setSection("");
         break;
       default:
-        history.replace("/signup");
+        history.replace("/signin");
         break;
     }
   }, [location, history]);
@@ -88,35 +75,6 @@ const Signup = () => {
     let valid = false;
     let moveIt = true;
     switch (name) {
-      case "first_name":
-        if (value.length === 0) {
-          msg = "First name is required";
-          moveIt = false;
-        } else if (value.length <= 2) {
-          msg = "First name can't be less than 5 characters";
-        } else {
-          valid = true;
-        }
-
-        setForm({
-          ...form,
-          first_name: { value, valid, touched: true, msg },
-        });
-        break;
-      case "last_name":
-        if (value.length === 0) {
-          msg = "Surname name is required";
-          moveIt = false;
-        } else if (value.length <= 2) {
-          msg = "Surname name can't be less than 5 characters";
-        } else {
-          valid = true;
-        }
-        setForm({
-          ...form,
-          last_name: { value, valid, touched: true, msg },
-        });
-        break;
       case "email":
         const emailExp = /^[^\s()<>@,;:/]+@\w[\w.-]+\.[a-z]{2,}$/i;
 
@@ -186,21 +144,15 @@ const Signup = () => {
       return result;
     }, {});
 
-    Post("auth/register", data)
+    Post("auth/login", data)
       .then((response) => {
         const { data } = response;
         if (data.success) {
           // Store data locally
-          const dataStore = data.data.session;
+          const dataStore = data.data;
 
           localStorage.setItem("user", JSON.stringify(dataStore));
           history.replace(`/${section}/dashboard`);
-          setTimeout(() => {
-            addToast(data.data.msg, {
-              appearance: "success",
-              autoDismiss: true,
-            });
-          }, 3000);
         } else {
           addToast(data.error, { appearance: "error", autoDismiss: true });
           setLoading(false);
@@ -218,7 +170,7 @@ const Signup = () => {
   return (
     <>
       <Helmet>
-        <title>Sign Up</title>
+        <title>Sign In</title>
       </Helmet>
       <Header style={{ background: "rgb(47, 45, 44)" }} />
       <section className="hero" style={{ height: "100%" }}>
@@ -235,21 +187,21 @@ const Signup = () => {
                     <div className="carousel-container">
                       <div className="carousel-content">
                         <h2 className="animated fadeInDown">
-                          <span>Sign</span> Up
+                          <span>Sign</span> In
                         </h2>
 
                         <p className="animated fadeInUp">
-                          Please select account type you want to create.
+                          Please select account type you want to signin with.
                         </p>
                         <div className="auth-btn">
                           <Link
-                            to="/signup/client"
+                            to="/signin/client"
                             className="btn-menu animated fadeInUp scrollto"
                           >
                             Client
                           </Link>
                           <Link
-                            to="/signup/company"
+                            to="/signin/company"
                             className="btn-book animated fadeInUp scrollto"
                           >
                             Tow Truck
@@ -288,58 +240,6 @@ const Signup = () => {
                                 <div className="form-input">
                                   <div>
                                     <label role="button" onClick={smoothLabel}>
-                                      First Name
-                                    </label>
-                                    <input
-                                      type="text"
-                                      name="first_name"
-                                      className=""
-                                      placeholder=""
-                                      onChange={onChange}
-                                      onBlur={onChange}
-                                    />
-                                  </div>
-                                  {form.first_name.touched &&
-                                  !form.first_name.valid ? (
-                                    <div
-                                      className="validate"
-                                      style={{ display: "block" }}
-                                    >
-                                      {form.first_name.msg}
-                                    </div>
-                                  ) : (
-                                    ""
-                                  )}
-                                </div>
-                                <div className="form-input">
-                                  <div>
-                                    <label role="button" onClick={smoothLabel}>
-                                      Surname
-                                    </label>
-                                    <input
-                                      type="text"
-                                      name="last_name"
-                                      className=""
-                                      placeholder=""
-                                      onChange={onChange}
-                                      onBlur={onChange}
-                                    />
-                                  </div>
-                                  {form.last_name.touched &&
-                                  !form.last_name.valid ? (
-                                    <div
-                                      className="validate"
-                                      style={{ display: "block" }}
-                                    >
-                                      {form.last_name.msg}
-                                    </div>
-                                  ) : (
-                                    ""
-                                  )}
-                                </div>
-                                <div className="form-input">
-                                  <div>
-                                    <label role="button" onClick={smoothLabel}>
                                       Email Address
                                     </label>
                                     <input
@@ -393,53 +293,18 @@ const Signup = () => {
                               </div>
                             </div>
 
-                            <div className="line"></div>
-                            <div className="row">
-                              <div className="col-md-12 col-xs-12 text-center termncondi">
-                                <div>
-                                  <input
-                                    id="termncondi"
-                                    type="checkbox"
-                                    name="termncondi"
-                                    onChange={(event) => {
-                                      const target = event.currentTarget;
-                                      setTerms(target.checked);
-                                    }}
-                                  />
-                                  <label htmlFor="termncondi">
-                                    by signing up you accept our{" "}
-                                    <a
-                                      href="#terms"
-                                      target="_blank"
-                                      title="Terms of Service"
-                                    >
-                                      Terms of Service
-                                    </a>{" "}
-                                    and{" "}
-                                    <a
-                                      href="#privacy"
-                                      target="_blank"
-                                      title="Privacy Policy"
-                                    >
-                                      Privacy Policy
-                                    </a>
-                                    .
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
                             <div className="text-center">
                               <button
                                 type="submit"
-                                disabled={!valid || !terms || loading}
+                                disabled={!valid || loading}
                               >
-                                {!loading ? "Create Account" : "Submitting..."}
+                                {!loading ? "Login" : "Submitting..."}
                               </button>
                             </div>
                             <div className="row">
                               <div className="col-md-12 col-xs-12 text-center auth-bottom">
-                                Already registered?{" "}
-                                <Link to="/signin/client">Sign In</Link>
+                                Not yet registered?{" "}
+                                <Link to="/signup/client">Create Account</Link>
                               </div>
                             </div>
                           </div>
@@ -469,58 +334,6 @@ const Signup = () => {
                                 <div className="form-input">
                                   <div>
                                     <label role="button" onClick={smoothLabel}>
-                                      First Name
-                                    </label>
-                                    <input
-                                      type="text"
-                                      name="first_name"
-                                      className=""
-                                      placeholder=""
-                                      onChange={onChange}
-                                      onBlur={onChange}
-                                    />
-                                  </div>
-                                  {form.first_name.touched &&
-                                  !form.first_name.valid ? (
-                                    <div
-                                      className="validate"
-                                      style={{ display: "block" }}
-                                    >
-                                      {form.first_name.msg}
-                                    </div>
-                                  ) : (
-                                    ""
-                                  )}
-                                </div>
-                                <div className="form-input">
-                                  <div>
-                                    <label role="button" onClick={smoothLabel}>
-                                      Surname
-                                    </label>
-                                    <input
-                                      type="text"
-                                      name="last_name"
-                                      className=""
-                                      placeholder=""
-                                      onChange={onChange}
-                                      onBlur={onChange}
-                                    />
-                                  </div>
-                                  {form.last_name.touched &&
-                                  !form.last_name.valid ? (
-                                    <div
-                                      className="validate"
-                                      style={{ display: "block" }}
-                                    >
-                                      {form.last_name.msg}
-                                    </div>
-                                  ) : (
-                                    ""
-                                  )}
-                                </div>
-                                <div className="form-input">
-                                  <div>
-                                    <label role="button" onClick={smoothLabel}>
                                       Email Address
                                     </label>
                                     <input
@@ -574,53 +387,18 @@ const Signup = () => {
                               </div>
                             </div>
 
-                            <div className="line"></div>
-                            <div className="row">
-                              <div className="col-md-12 col-xs-12 text-center termncondi">
-                                <div>
-                                  <input
-                                    id="termncondi"
-                                    type="checkbox"
-                                    name="termncondi"
-                                    onChange={(event) => {
-                                      const target = event.currentTarget;
-                                      setTerms(target.checked);
-                                    }}
-                                  />
-                                  <label htmlFor="termncondi">
-                                    by signing up you accept our{" "}
-                                    <a
-                                      href="#terms"
-                                      target="_blank"
-                                      title="Terms of Service"
-                                    >
-                                      Terms of Service
-                                    </a>{" "}
-                                    and{" "}
-                                    <a
-                                      href="#privacy"
-                                      target="_blank"
-                                      title="Privacy Policy"
-                                    >
-                                      Privacy Policy
-                                    </a>
-                                    .
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
                             <div className="text-center">
                               <button
                                 type="submit"
-                                disabled={!valid || !terms || loading}
+                                disabled={!valid || loading}
                               >
-                                {!loading ? "Create Account" : "Submitting..."}
+                                {!loading ? "Login" : "Submitting..."}
                               </button>
                             </div>
                             <div className="row">
                               <div className="col-md-12 col-xs-12 text-center auth-bottom">
-                                Already registered?{" "}
-                                <Link to="/signin/company">Sign In</Link>
+                                Not yet registered?{" "}
+                                <Link to="/signup/company">Create Account</Link>
                               </div>
                             </div>
                           </div>
@@ -643,4 +421,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Signin;

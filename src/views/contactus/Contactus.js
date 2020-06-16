@@ -83,7 +83,7 @@ const Contactus = () => {
 
         setForm({
           ...form,
-          subject: { value, valid: false, touched: true, msg },
+          subject: { value, valid, touched: true, msg },
         });
         break;
       case "message":
@@ -96,7 +96,7 @@ const Contactus = () => {
         }
         setForm({
           ...form,
-          message: { value, valid: false, touched: true, msg },
+          message: { value, valid, touched: true, msg },
         });
         break;
       default:
